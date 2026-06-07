@@ -8,6 +8,7 @@ import { buildCollectionGapPlan, collectionGapPlanSummary } from "./collection-g
 import { createWatchPartyPlanner, createWeekendConcierge } from "./concierge";
 import { buildFranchiseWatchOrder, franchiseGuideSummary } from "./franchise";
 import { buildPersonWatchPath, personWatchPathSummary } from "./person-path";
+import { buildReleaseCalendarWatchlist, releaseCalendarWatchlistSummary } from "./release-calendar";
 import { recommendFromTasteProfile, tasteProfileSummary } from "./taste";
 
 interface Env {
@@ -714,6 +715,37 @@ function createTMDBServer(env: Env): McpServer {
   );
 
   server.registerTool(
+    "build_release_calendar_watchlist",
+    {
+      description: "Build a release-window watchlist with upcoming movies, provider-ready picks, broad-room baselines, and watch-later scoring",
+      inputSchema: {
+        country: z.string().optional().describe("ISO 3166-1 country code for release/provider context, defaults to IN"),
+        language: z.string().optional().describe("Original language code such as en, hi, ta, te, ko, or any"),
+        genre: z.string().optional().describe("Optional genre name, for example action, comedy, or family"),
+        days: z.string().optional().describe("Forward-looking release window in days, from 7 to 180. Defaults to 90"),
+        recentDays: z.string().optional().describe("Recent-release backfill window in days, from 0 to 90. Defaults to 30"),
+        services: z.array(z.string()).optional().describe("Preferred streaming services, for example Netflix or Prime Video"),
+        minRating: z.string().optional().describe("Minimum TMDB rating from 0 to 9, defaults to 0"),
+        maxResults: z.string().optional().describe("Number of watchlist entries to return, from 3 to 12. Defaults to 8"),
+      },
+      annotations: READ_ONLY_TOOL,
+    },
+    async ({ country, language, genre, days, recentDays, services, minRating, maxResults }) => {
+      const result = await buildReleaseCalendarWatchlist(env, {
+        country,
+        language,
+        genre,
+        days,
+        recentDays,
+        services,
+        minRating,
+        maxResults,
+      });
+      return textResult(releaseCalendarWatchlistSummary(result));
+    },
+  );
+
+  server.registerTool(
     "search_movies",
     {
       description: "Search for movies by title or keywords",
@@ -1209,7 +1241,7 @@ export default {
       }, { headers: securityHeaders() });
     }
 
-    if (request.method === "OPTIONS" && (url.pathname === "/api/concierge" || url.pathname === "/api/watch-party" || url.pathname === "/api/weekly-trending-languages" || url.pathname === "/api/collection-gap-plan")) {
+    if (request.method === "OPTIONS" && (url.pathname === "/api/concierge" || url.pathname === "/api/watch-party" || url.pathname === "/api/weekly-trending-languages" || url.pathname === "/api/collection-gap-plan" || url.pathname === "/api/taste-profile" || url.pathname === "/api/person-watch-path")) {
       return new Response(null, {
         status: 204,
         headers: {
@@ -1320,6 +1352,62 @@ export default {
       } catch (error) {
         return Response.json(
           { error: error instanceof Error ? error.message : "Unable to build collection gap plan." },
+          {
+            status: 500,
+            headers: {
+              ...securityHeaders(),
+              "access-control-allow-origin": "*",
+            },
+          },
+        );
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/taste-profile") {
+      if (!authorized(request, env)) {
+        return unauthorizedResponse();
+      }
+
+      try {
+        const input = await request.json().catch(() => ({}));
+        const result = await recommendFromTasteProfile(env, input as Record<string, unknown>);
+        return Response.json(result, {
+          headers: {
+            ...securityHeaders(),
+            "access-control-allow-origin": "*",
+          },
+        });
+      } catch (error) {
+        return Response.json(
+          { error: error instanceof Error ? error.message : "Unable to recommend from taste profile." },
+          {
+            status: 500,
+            headers: {
+              ...securityHeaders(),
+              "access-control-allow-origin": "*",
+            },
+          },
+        );
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/person-watch-path") {
+      if (!authorized(request, env)) {
+        return unauthorizedResponse();
+      }
+
+      try {
+        const input = await request.json().catch(() => ({}));
+        const result = await buildPersonWatchPath(env, input as Record<string, unknown>);
+        return Response.json(result, {
+          headers: {
+            ...securityHeaders(),
+            "access-control-allow-origin": "*",
+          },
+        });
+      } catch (error) {
+        return Response.json(
+          { error: error instanceof Error ? error.message : "Unable to build person watch path." },
           {
             status: 500,
             headers: {

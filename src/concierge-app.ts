@@ -597,6 +597,40 @@ export function renderConciergeApp(): string {
       align-items: end;
     }
 
+    .planning-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f4efe7;
+    }
+
+    .planning-tab {
+      min-height: 38px;
+      border: 0;
+      border-radius: 6px;
+      color: #06493f;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .planning-tab[aria-pressed="true"] {
+      background: var(--panel);
+      box-shadow: 0 1px 0 rgba(24, 24, 24, 0.08);
+    }
+
+    .planning-pane[hidden] {
+      display: none;
+    }
+
+    .planning-pane {
+      display: grid;
+      gap: 12px;
+    }
+
     .planning-button {
       min-width: 112px;
       height: 42px;
@@ -613,7 +647,8 @@ export function renderConciergeApp(): string {
       background: #7c9992;
     }
 
-    .gap-output {
+    .gap-output,
+    .lab-output {
       display: grid;
       gap: 12px;
     }
@@ -625,7 +660,8 @@ export function renderConciergeApp(): string {
     }
 
     .gap-kpi,
-    .gap-section {
+    .gap-section,
+    .lab-section {
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fffdf8;
@@ -653,14 +689,16 @@ export function renderConciergeApp(): string {
       gap: 12px;
     }
 
-    .gap-section h4 {
+    .gap-section h4,
+    .lab-section h4 {
       margin: 0 0 10px;
       font-size: 13px;
       line-height: 1.2;
       letter-spacing: 0;
     }
 
-    .gap-list {
+    .gap-list,
+    .lab-list {
       display: grid;
       gap: 10px;
       margin: 0;
@@ -668,7 +706,8 @@ export function renderConciergeApp(): string {
       list-style: none;
     }
 
-    .gap-item {
+    .gap-item,
+    .lab-item {
       display: grid;
       gap: 6px;
       color: #343434;
@@ -676,7 +715,8 @@ export function renderConciergeApp(): string {
       line-height: 1.35;
     }
 
-    .gap-item strong {
+    .gap-item strong,
+    .lab-item strong {
       color: var(--ink);
     }
 
@@ -1172,35 +1212,96 @@ export function renderConciergeApp(): string {
       <section class="planning-panel" aria-labelledby="planning-heading">
         <div class="planning-head">
           <h3 id="planning-heading">Planning Lab</h3>
-          <p>Build a franchise completion plan from watched titles, provider availability, and remaining runtime.</p>
+          <p>Turn existing MCP workflows into focused planning views for franchise gaps, taste-fit picks, and person watch paths.</p>
         </div>
-        <form id="collection-gap-form" class="planning-form">
-          <div class="field">
-            <label for="gapQuery">Franchise/title</label>
-            <input id="gapQuery" name="query" type="text" autocomplete="off" value="The Matrix">
-          </div>
-          <div class="field">
-            <label for="watchedTitles">Watched titles or IDs</label>
-            <input id="watchedTitles" name="watchedTitles" type="text" autocomplete="off" placeholder="The Matrix, 604">
-          </div>
-          <div class="field">
-            <label for="gapCountry">Country</label>
-            <select id="gapCountry" name="country">
-              <option value="IN">India</option>
-              <option value="US" selected>United States</option>
-              <option value="GB">United Kingdom</option>
-              <option value="CA">Canada</option>
-              <option value="AU">Australia</option>
-              <option value="SG">Singapore</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="maxMovies">Max entries</label>
-            <input id="maxMovies" name="maxMovies" type="number" min="2" max="20" step="1" value="12">
-          </div>
-          <button class="planning-button" id="run-gap-plan" type="submit">Build plan</button>
-        </form>
-        <div id="gap-output" class="empty">Enter a franchise and watched titles to generate a collection gap plan.</div>
+        <div class="planning-tabs" role="tablist" aria-label="Planning Lab workflows">
+          <button class="planning-tab" type="button" data-planning-tab="gaps" aria-pressed="true">Gaps</button>
+          <button class="planning-tab" type="button" data-planning-tab="taste" aria-pressed="false">Taste</button>
+          <button class="planning-tab" type="button" data-planning-tab="person" aria-pressed="false">Person</button>
+        </div>
+        <div class="planning-pane" data-planning-pane="gaps">
+          <form id="collection-gap-form" class="planning-form">
+            <div class="field">
+              <label for="gapQuery">Franchise/title</label>
+              <input id="gapQuery" name="query" type="text" autocomplete="off" value="The Matrix">
+            </div>
+            <div class="field">
+              <label for="watchedTitles">Watched titles or IDs</label>
+              <input id="watchedTitles" name="watchedTitles" type="text" autocomplete="off" placeholder="The Matrix, 604">
+            </div>
+            <div class="field">
+              <label for="gapCountry">Country</label>
+              <select id="gapCountry" name="country">
+                <option value="IN">India</option>
+                <option value="US" selected>United States</option>
+                <option value="GB">United Kingdom</option>
+                <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
+                <option value="SG">Singapore</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="maxMovies">Max entries</label>
+              <input id="maxMovies" name="maxMovies" type="number" min="2" max="20" step="1" value="12">
+            </div>
+            <button class="planning-button" id="run-gap-plan" type="submit">Build plan</button>
+          </form>
+          <div id="gap-output" class="empty">Enter a franchise and watched titles to generate a collection gap plan.</div>
+        </div>
+        <div class="planning-pane" data-planning-pane="taste" hidden>
+          <form id="taste-form" class="planning-form">
+            <div class="field">
+              <label for="likedTitles">Liked titles</label>
+              <input id="likedTitles" name="likedTitles" type="text" autocomplete="off" value="The Matrix, Inception">
+            </div>
+            <div class="field">
+              <label for="dislikedTitles">Avoid style</label>
+              <input id="dislikedTitles" name="dislikedTitles" type="text" autocomplete="off" value="The Notebook">
+            </div>
+            <div class="field">
+              <label for="tasteCountry">Country</label>
+              <select id="tasteCountry" name="country">
+                <option value="IN">India</option>
+                <option value="US" selected>United States</option>
+                <option value="GB">United Kingdom</option>
+                <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
+                <option value="SG">Singapore</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="tasteMaxResults">Max picks</label>
+              <input id="tasteMaxResults" name="maxResults" type="number" min="3" max="10" step="1" value="5">
+            </div>
+            <button class="planning-button" id="run-taste-plan" type="submit">Recommend</button>
+          </form>
+          <div id="taste-output" class="empty">Enter liked and disliked titles to generate a taste-fit shortlist.</div>
+        </div>
+        <div class="planning-pane" data-planning-pane="person" hidden>
+          <form id="person-path-form" class="planning-form">
+            <div class="field">
+              <label for="personName">Actor/director</label>
+              <input id="personName" name="name" type="text" autocomplete="off" value="Keanu Reeves">
+            </div>
+            <div class="field">
+              <label for="personCountry">Country</label>
+              <select id="personCountry" name="country">
+                <option value="IN">India</option>
+                <option value="US" selected>United States</option>
+                <option value="GB">United Kingdom</option>
+                <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
+                <option value="SG">Singapore</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="maxTitles">Max titles</label>
+              <input id="maxTitles" name="maxTitles" type="number" min="3" max="8" step="1" value="5">
+            </div>
+            <button class="planning-button" id="run-person-path" type="submit">Build path</button>
+          </form>
+          <div id="person-output" class="empty">Enter a person to build a starter watch path from their filmography.</div>
+        </div>
       </section>
 
       <section class="workflow-panel" aria-labelledby="workflow-heading">
@@ -1299,8 +1400,14 @@ export function renderConciergeApp(): string {
     const mcpOutput = document.querySelector("#mcp-output");
     const mcpSummary = document.querySelector("#mcp-summary");
     const collectionGapForm = document.querySelector("#collection-gap-form");
+    const tasteForm = document.querySelector("#taste-form");
+    const personPathForm = document.querySelector("#person-path-form");
     const runGapPlan = document.querySelector("#run-gap-plan");
+    const runTastePlan = document.querySelector("#run-taste-plan");
+    const runPersonPath = document.querySelector("#run-person-path");
     const gapOutput = document.querySelector("#gap-output");
+    const tasteOutput = document.querySelector("#taste-output");
+    const personOutput = document.querySelector("#person-output");
     let selectedMode = "solo";
     let selectedMood = "crowd";
     let selectedMoods = new Set(["crowd"]);
@@ -1308,6 +1415,7 @@ export function renderConciergeApp(): string {
       "advanced_search",
       "build_collection_gap_plan",
       "build_franchise_watch_order",
+      "build_release_calendar_watchlist",
       "compare_movies",
       "find_where_to_watch",
       "get_movie_details",
@@ -1412,6 +1520,20 @@ export function renderConciergeApp(): string {
     loadTrends.addEventListener("click", loadWeeklyTrends);
     runMcpSmoke.addEventListener("click", runMcpToolSmoke);
     collectionGapForm.addEventListener("submit", buildCollectionGapPlan);
+    tasteForm.addEventListener("submit", recommendFromTasteProfile);
+    personPathForm.addEventListener("submit", buildPersonWatchPath);
+
+    document.querySelectorAll(".planning-tab").forEach((button) => {
+      button.addEventListener("click", () => {
+        const selected = button.dataset.planningTab;
+        document.querySelectorAll(".planning-tab").forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+        document.querySelectorAll(".planning-pane").forEach((pane) => {
+          pane.hidden = pane.dataset.planningPane !== selected;
+        });
+      });
+    });
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -1591,6 +1713,10 @@ export function renderConciergeApp(): string {
             name: "build_person_watch_path",
             arguments: { name: "Keanu Reeves", country: "US", services: ["Netflix", "Prime Video"], maxTitles: "5" },
           }),
+          client.rpc("tools/call", {
+            name: "build_release_calendar_watchlist",
+            arguments: { country: "US", language: "any", genre: "action", days: "90", recentDays: "30", services: ["Netflix", "Prime Video"], minRating: "0", maxResults: "5" },
+          }),
         ]);
 
         const sampleData = [
@@ -1602,6 +1728,7 @@ export function renderConciergeApp(): string {
           { name: "build_collection_gap_plan", text: textFromToolResult(samples[5]) },
           { name: "recommend_from_taste_profile", text: textFromToolResult(samples[6]) },
           { name: "build_person_watch_path", text: textFromToolResult(samples[7]) },
+          { name: "build_release_calendar_watchlist", text: textFromToolResult(samples[8]) },
         ];
         renderMcpSmoke(toolNames, sampleData);
         statusEl.textContent = "Done";
@@ -1661,6 +1788,108 @@ export function renderConciergeApp(): string {
         runGapPlan.disabled = false;
         runGapPlan.textContent = "Build plan";
       }
+    }
+
+    async function recommendFromTasteProfile(event) {
+      event.preventDefault();
+      const data = new FormData(tasteForm);
+      const token = String(accessToken.value || "").trim();
+      if (token) {
+        sessionStorage.setItem("tmdbConciergeAccessToken", token);
+      }
+
+      const selectedServices = selectedPlanningServices();
+      const payload = {
+        likedTitles: csvValues(data.get("likedTitles")),
+        dislikedTitles: csvValues(data.get("dislikedTitles")),
+        country: data.get("country"),
+        services: selectedServices,
+        language: form.querySelector('select[name="language"]').value,
+        runtime: form.querySelector('select[name="runtime"]').value,
+        minRating: form.querySelector('input[name="minRating"]').value,
+        maxResults: String(data.get("maxResults") || "5"),
+      };
+
+      runTastePlan.disabled = true;
+      runTastePlan.textContent = "Checking";
+      tasteOutput.className = "empty";
+      tasteOutput.textContent = "Resolving liked titles and scoring recommendations...";
+
+      try {
+        const response = await fetch("/api/taste-profile", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            ...(token ? { authorization: "Bearer " + token } : {}),
+          },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Request failed");
+        renderTasteProfile(result);
+        statusEl.textContent = "Done";
+      } catch (error) {
+        tasteOutput.className = "error";
+        tasteOutput.textContent = error instanceof Error ? error.message : "Unable to recommend from taste profile.";
+        statusEl.textContent = "Error";
+      } finally {
+        runTastePlan.disabled = false;
+        runTastePlan.textContent = "Recommend";
+      }
+    }
+
+    async function buildPersonWatchPath(event) {
+      event.preventDefault();
+      const data = new FormData(personPathForm);
+      const token = String(accessToken.value || "").trim();
+      if (token) {
+        sessionStorage.setItem("tmdbConciergeAccessToken", token);
+      }
+
+      const payload = {
+        name: String(data.get("name") || "").trim(),
+        country: data.get("country"),
+        services: selectedPlanningServices(),
+        maxTitles: String(data.get("maxTitles") || "5"),
+      };
+
+      runPersonPath.disabled = true;
+      runPersonPath.textContent = "Building";
+      personOutput.className = "empty";
+      personOutput.textContent = "Scanning filmography, ratings, and provider availability...";
+
+      try {
+        const response = await fetch("/api/person-watch-path", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            ...(token ? { authorization: "Bearer " + token } : {}),
+          },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Request failed");
+        renderPersonWatchPath(result);
+        statusEl.textContent = "Done";
+      } catch (error) {
+        personOutput.className = "error";
+        personOutput.textContent = error instanceof Error ? error.message : "Unable to build person watch path.";
+        statusEl.textContent = "Error";
+      } finally {
+        runPersonPath.disabled = false;
+        runPersonPath.textContent = "Build path";
+      }
+    }
+
+    function selectedPlanningServices() {
+      return Array.from(form.querySelectorAll('input[name="services"]:checked')).map((item) => item.value);
+    }
+
+    function csvValues(value) {
+      return String(value || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
     }
 
     function createMcpClient(token) {
@@ -1837,6 +2066,45 @@ export function renderConciergeApp(): string {
         "</div>";
     }
 
+    function renderTasteProfile(result) {
+      tasteOutput.className = "lab-output";
+      const picks = result.picks || [];
+      const decision = renderDecisionSection("Decision", result.decision || []);
+      const items = picks.length
+        ? "<ol class=\\"lab-list\\">" + picks.map((pick) =>
+            "<li class=\\"lab-item\\">" +
+              "<strong>" + escapeHtml(pick.title) + " (" + escapeHtml(pick.year) + ")</strong>" +
+              "<span>" + Number(pick.rating || 0).toFixed(1) + "/10 · score " + escapeHtml(pick.score || 0) + " · " + (pick.runtime ? escapeHtml(pick.runtime + " min") : "runtime unknown") + "</span>" +
+              "<span>" + escapeHtml((pick.matchReasons || []).slice(0, 3).join(" · ")) + "</span>" +
+              renderProviderChips(pick.providers, []) +
+            "</li>"
+          ).join("") + "</ol>"
+        : "<div class=\\"trend-empty\\">No recommendations survived the current filters.</div>";
+      tasteOutput.innerHTML =
+        decision +
+        "<article class=\\"lab-section\\"><h4>Taste-fit picks for " + escapeHtml(result.country) + "</h4>" + items + "</article>" +
+        renderDecisionSection("Notes", result.notes || []);
+    }
+
+    function renderPersonWatchPath(result) {
+      personOutput.className = "lab-output";
+      const picks = result.picks || [];
+      const items = picks.length
+        ? "<ol class=\\"lab-list\\">" + picks.map((pick) =>
+            "<li class=\\"lab-item\\">" +
+              "<strong>" + escapeHtml(pick.role) + ": " + escapeHtml(pick.title) + " (" + escapeHtml(pick.year) + ")</strong>" +
+              "<span>" + Number(pick.rating || 0).toFixed(1) + "/10 · " + (pick.runtime ? escapeHtml(pick.runtime + " min") : "runtime unknown") + " · " + escapeHtml(pick.credit || "credit unknown") + "</span>" +
+              "<span>" + escapeHtml(pick.reason || "") + "</span>" +
+              renderProviderChips(pick.providers, []) +
+            "</li>"
+          ).join("") + "</ol>"
+        : "<div class=\\"trend-empty\\">No eligible credits found.</div>";
+      personOutput.innerHTML =
+        renderDecisionSection(result.name + " · " + result.department, result.decision || []) +
+        "<article class=\\"lab-section\\"><h4>Starter path for " + escapeHtml(result.country) + "</h4>" + items + "</article>" +
+        renderDecisionSection("Notes", result.notes || []);
+    }
+
     function renderGapSection(title, movies) {
       const body = movies.length
         ? "<ol class=\\"gap-list\\">" + movies.slice(0, 8).map((movie) =>
@@ -1850,6 +2118,13 @@ export function renderConciergeApp(): string {
       return "<article class=\\"gap-section\\"><h4>" + escapeHtml(title) + "</h4>" + body + "</article>";
     }
 
+    function renderDecisionSection(title, lines) {
+      const body = lines.length
+        ? "<ul class=\\"gap-list\\">" + lines.map((line) => "<li class=\\"gap-item\\">" + escapeHtml(line) + "</li>").join("") + "</ul>"
+        : "<div class=\\"trend-empty\\">No notes.</div>";
+      return "<article class=\\"lab-section\\"><h4>" + escapeHtml(title) + "</h4>" + body + "</article>";
+    }
+
     function renderGapProviders(movie) {
       const providers = Array.from(new Set([
         ...(movie.providers?.streaming || []),
@@ -1861,6 +2136,16 @@ export function renderConciergeApp(): string {
         ...providers.map((provider) => chip(provider, matches.includes(provider) ? "reason" : "provider")),
         movie.availableNow ? chip("streaming now", "provider") : null,
       ].filter(Boolean).join("");
+      return chips ? "<div class=\\"providers\\">" + chips + "</div>" : "<span>Availability: no providers found</span>";
+    }
+
+    function renderProviderChips(providers, matches) {
+      const visible = Array.from(new Set([
+        ...(providers?.streaming || []),
+        ...(providers?.rent || []).slice(0, 2),
+        ...(providers?.buy || []).slice(0, 1),
+      ])).slice(0, 4);
+      const chips = visible.map((provider) => chip(provider, matches.includes(provider) ? "reason" : "provider")).join("");
       return chips ? "<div class=\\"providers\\">" + chips + "</div>" : "<span>Availability: no providers found</span>";
     }
 

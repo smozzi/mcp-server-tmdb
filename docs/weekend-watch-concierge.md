@@ -4,8 +4,8 @@ Weekend Watch Concierge is a Cloudflare Worker app and remote MCP tool built on 
 
 It has two user surfaces:
 
-- Browser app: solo picks, Watch Party plans, and Planning Lab collection-gap plans from mood, country, language, runtime, rating, streaming-service, group-size, family-safe, watched-title, and avoided-title filters. It also shows script-first workflow commands for local Markdown artifacts.
-- Remote MCP tools: `get_weekend_watchlist`, `plan_watch_party`, `build_franchise_watch_order`, `build_collection_gap_plan`, `recommend_from_taste_profile`, and `build_person_watch_path`, so agents can ask for the same shortlist, group plan, franchise guide, collection gap plan, taste-based recommendations, or person watch path through `/mcp`.
+- Browser app: solo picks, Watch Party plans, and Planning Lab tabs for collection gaps, taste-profile recommendations, and person watch paths from mood, country, language, runtime, rating, streaming-service, group-size, family-safe, watched-title, liked-title, disliked-title, person-name, and avoided-title filters. It also shows script-first workflow commands for local Markdown artifacts.
+- Remote MCP tools: `get_weekend_watchlist`, `plan_watch_party`, `build_franchise_watch_order`, `build_collection_gap_plan`, `recommend_from_taste_profile`, `build_person_watch_path`, and `build_release_calendar_watchlist`, so agents can ask for the same shortlist, group plan, franchise guide, collection gap plan, taste-based recommendations, person watch path, or release-window watchlist through `/mcp`.
 
 ## Screenshots
 
@@ -131,9 +131,11 @@ The **Planning Lab** panel calls:
 
 ```text
 POST /api/collection-gap-plan
+POST /api/taste-profile
+POST /api/person-watch-path
 ```
 
-and renders watched entries, missing entries, completion percentage, remaining runtime, provider availability, and a recommended completion path. The endpoint uses the same shared logic as the `build_collection_gap_plan` MCP tool.
+and renders watched/missing entries, completion percentage, remaining runtime, provider availability, taste-fit picks, and person starter paths. The endpoints use the same shared logic as the `build_collection_gap_plan`, `recommend_from_taste_profile`, and `build_person_watch_path` MCP tools.
 
 ## MCP Tool
 

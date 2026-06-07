@@ -70,7 +70,7 @@ Keep something as a script when it is mainly for verification, a demo story, or 
 - `scripts/now-playing-follow-on-demo.mjs`: produces an example workflow artifact
 - `scripts/weekly-trending-languages.mjs`: shareable language-trend demo
 - `scripts/weekly-streaming-radar.mjs`: script-first weekly radar artifact
-- `scripts/release-calendar-watchlist.mjs`: script-first release calendar artifact
+- `scripts/release-calendar-watchlist.mjs`: Markdown artifact wrapper around `build_release_calendar_watchlist`
 - `scripts/provider-change-monitor.mjs`: script-first provider delta monitor with a JSON snapshot
 - `scripts/collection-gap-finder.mjs`: Markdown artifact wrapper around `build_collection_gap_plan`
 
@@ -101,6 +101,7 @@ If a feature fails those checks, keep it as shared code or a script until it pro
 | `build_collection_gap_plan` | Find missing entries in a watched franchise | Franchise completion planning |
 | `recommend_from_taste_profile` | Recommend from liked and disliked titles | Personalized discovery |
 | `build_person_watch_path` | Find a starter path for an actor/director | Filmography decisions |
+| `build_release_calendar_watchlist` | Track upcoming release-window candidates | Watch-later planning |
 | `compare_movies` | Choose between known movie IDs | Side-by-side tradeoffs |
 | `find_where_to_watch` | Check availability for one or more titles | Actionable provider lookup |
 
@@ -113,6 +114,7 @@ Recently added:
 - `scripts/release-calendar-watchlist.mjs`
 - `scripts/provider-change-monitor.mjs`
 - `build_collection_gap_plan`
+- `build_release_calendar_watchlist`
 - `familySafe` filtering inside `get_weekend_watchlist` and `plan_watch_party`
 
 Recommended next features, in order:
@@ -123,14 +125,14 @@ Recommended next features, in order:
    - Why: persistence belongs outside MCP until the storage boundary is explicit.
 
 2. **Planning Lab Expansion**
-   - Tool or UI: application UI first
-   - Output: interactive tabs for taste profile, person path, and release calendar workflows
-   - Why: expose the strongest MCP workflows without adding unnecessary tool surface.
+   - Status: partially implemented in the Worker browser app
+   - Output: interactive tabs for collection gaps, taste profile, and person path workflows
+   - Next: add release calendar as a Planning Lab tab once the UI contract is clear.
 
 3. **Release Calendar Promotion**
-   - Tool: only if the script proves it is used often
+   - Status: implemented as `build_release_calendar_watchlist`
    - Output: stable MCP result for release-window watch decisions
-   - Why: keep it script-first until the user intent is proven.
+   - Next: consider adding recent-release backfill or saved watchlist state outside MCP.
 
 ## Verification Checklist
 
