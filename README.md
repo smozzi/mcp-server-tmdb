@@ -361,6 +361,8 @@ The app uses:
 
 - `POST /api/concierge` for ranked movie picks
 - `POST /api/collection-gap-plan` for Planning Lab collection gaps
+- `POST /api/taste-profile` for Planning Lab taste-fit recommendations
+- `POST /api/person-watch-path` for Planning Lab person watch paths
 - `GET /health` for deployment health
 - `POST /mcp` for remote MCP clients
 

@@ -123,9 +123,9 @@ Recommended next features, in order:
    - Why: persistence belongs outside MCP until the storage boundary is explicit.
 
 2. **Planning Lab Expansion**
-   - Tool or UI: application UI first
-   - Output: interactive tabs for taste profile, person path, and release calendar workflows
-   - Why: expose the strongest MCP workflows without adding unnecessary tool surface.
+   - Status: partially implemented in the Worker browser app
+   - Output: interactive tabs for collection gaps, taste profile, and person path workflows
+   - Next: add release calendar once the script-first workflow proves a stable app contract.
 
 3. **Release Calendar Promotion**
    - Tool: only if the script proves it is used often

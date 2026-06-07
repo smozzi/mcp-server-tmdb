@@ -1209,7 +1209,7 @@ export default {
       }, { headers: securityHeaders() });
     }
 
-    if (request.method === "OPTIONS" && (url.pathname === "/api/concierge" || url.pathname === "/api/watch-party" || url.pathname === "/api/weekly-trending-languages" || url.pathname === "/api/collection-gap-plan")) {
+    if (request.method === "OPTIONS" && (url.pathname === "/api/concierge" || url.pathname === "/api/watch-party" || url.pathname === "/api/weekly-trending-languages" || url.pathname === "/api/collection-gap-plan" || url.pathname === "/api/taste-profile" || url.pathname === "/api/person-watch-path")) {
       return new Response(null, {
         status: 204,
         headers: {
@@ -1320,6 +1320,62 @@ export default {
       } catch (error) {
         return Response.json(
           { error: error instanceof Error ? error.message : "Unable to build collection gap plan." },
+          {
+            status: 500,
+            headers: {
+              ...securityHeaders(),
+              "access-control-allow-origin": "*",
+            },
+          },
+        );
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/taste-profile") {
+      if (!authorized(request, env)) {
+        return unauthorizedResponse();
+      }
+
+      try {
+        const input = await request.json().catch(() => ({}));
+        const result = await recommendFromTasteProfile(env, input as Record<string, unknown>);
+        return Response.json(result, {
+          headers: {
+            ...securityHeaders(),
+            "access-control-allow-origin": "*",
+          },
+        });
+      } catch (error) {
+        return Response.json(
+          { error: error instanceof Error ? error.message : "Unable to recommend from taste profile." },
+          {
+            status: 500,
+            headers: {
+              ...securityHeaders(),
+              "access-control-allow-origin": "*",
+            },
+          },
+        );
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/person-watch-path") {
+      if (!authorized(request, env)) {
+        return unauthorizedResponse();
+      }
+
+      try {
+        const input = await request.json().catch(() => ({}));
+        const result = await buildPersonWatchPath(env, input as Record<string, unknown>);
+        return Response.json(result, {
+          headers: {
+            ...securityHeaders(),
+            "access-control-allow-origin": "*",
+          },
+        });
+      } catch (error) {
+        return Response.json(
+          { error: error instanceof Error ? error.message : "Unable to build person watch path." },
           {
             status: 500,
             headers: {
