@@ -21,6 +21,7 @@ const EXPECTED_TOOLS = [
   "advanced_search",
   "build_collection_gap_plan",
   "build_franchise_watch_order",
+  "build_release_calendar_watchlist",
   "compare_movies",
   "find_where_to_watch",
   "get_movie_details",
@@ -296,6 +297,18 @@ async function main() {
     });
     assertIncludes(personText, "Person Watch Path", "build_person_watch_path");
 
+    const releaseCalendarText = await callToolText(client, "build_release_calendar_watchlist", {
+      country: "US",
+      language: "any",
+      genre: "action",
+      days: "90",
+      recentDays: "30",
+      services: ["Netflix", "Prime Video"],
+      minRating: "0",
+      maxResults: "5",
+    });
+    assertIncludes(releaseCalendarText, "Release Calendar Watchlist", "build_release_calendar_watchlist");
+
     const generatedAt = new Date().toISOString();
     const artifact = [
       "# TMDB MCP Tool Surface Smoke",
@@ -349,13 +362,17 @@ async function main() {
       "",
       fenced(excerpt(personText, 18)),
       "",
+      "### build_release_calendar_watchlist",
+      "",
+      fenced(excerpt(releaseCalendarText, 18)),
+      "",
     ].join("\n");
 
     await mkdir(path.dirname(outputPath), { recursive: true });
     await writeFile(outputPath, artifact);
 
     console.log(`Tool contract OK: ${actualTools.length} tools.`);
-    console.log("Workflow calls OK: compare_movies, find_where_to_watch, get_weekend_watchlist, plan_watch_party, build_franchise_watch_order, build_collection_gap_plan, recommend_from_taste_profile, build_person_watch_path.");
+    console.log("Workflow calls OK: compare_movies, find_where_to_watch, get_weekend_watchlist, plan_watch_party, build_franchise_watch_order, build_collection_gap_plan, recommend_from_taste_profile, build_person_watch_path, build_release_calendar_watchlist.");
     console.log(`Wrote ${outputPath}`);
   } finally {
     await client.close();

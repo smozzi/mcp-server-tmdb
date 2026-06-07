@@ -12,6 +12,7 @@ For the architecture split between the reusable MCP server and higher-level feat
 - **build_franchise_watch_order** — Franchise/universe guide with release order, suggested order, total runtime, and provider-aware notes
 - **build_collection_gap_plan** — Franchise completion plan with watched/missing entries, remaining runtime, provider availability, and completion path
 - **recommend_from_taste_profile** — Recommendations from liked/disliked titles with provider-aware scoring, match reasons, and cautions
+- **build_release_calendar_watchlist** — Release-window watchlist with upcoming movies, provider-ready picks, broad-room baselines, and watch-later scoring
 - **search_movies** — Search by title/keywords → titles, IDs, ratings, overviews
 - **get_trending** — Top 10 trending movies (`timeWindow`: "day" | "week")
 - **get_weekly_trending_by_language** — Weekly trending movies grouped by original language into English, Hindi, and Telugu
@@ -138,7 +139,7 @@ examples/weekly-streaming-radar.md
 
 ## Release Calendar Watchlist
 
-The release calendar is also script-first. It creates a Markdown artifact for upcoming or recent release-window scanning, watch-later candidates, family-safe baselines, and provider probes.
+The release calendar is available as the MCP tool `build_release_calendar_watchlist`. The demo script calls that tool and writes a Markdown artifact for release-window scanning, watch-later candidates, provider-ready picks, and broad-room baselines.
 
 Local stdio MCP:
 

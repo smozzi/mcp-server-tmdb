@@ -1415,6 +1415,7 @@ export function renderConciergeApp(): string {
       "advanced_search",
       "build_collection_gap_plan",
       "build_franchise_watch_order",
+      "build_release_calendar_watchlist",
       "compare_movies",
       "find_where_to_watch",
       "get_movie_details",
@@ -1712,6 +1713,10 @@ export function renderConciergeApp(): string {
             name: "build_person_watch_path",
             arguments: { name: "Keanu Reeves", country: "US", services: ["Netflix", "Prime Video"], maxTitles: "5" },
           }),
+          client.rpc("tools/call", {
+            name: "build_release_calendar_watchlist",
+            arguments: { country: "US", language: "any", genre: "action", days: "90", recentDays: "30", services: ["Netflix", "Prime Video"], minRating: "0", maxResults: "5" },
+          }),
         ]);
 
         const sampleData = [
@@ -1723,6 +1728,7 @@ export function renderConciergeApp(): string {
           { name: "build_collection_gap_plan", text: textFromToolResult(samples[5]) },
           { name: "recommend_from_taste_profile", text: textFromToolResult(samples[6]) },
           { name: "build_person_watch_path", text: textFromToolResult(samples[7]) },
+          { name: "build_release_calendar_watchlist", text: textFromToolResult(samples[8]) },
         ];
         renderMcpSmoke(toolNames, sampleData);
         statusEl.textContent = "Done";

@@ -25,6 +25,7 @@ import { buildCollectionGapPlan, collectionGapPlanSummary } from "./collection-g
 import { createWatchPartyPlanner, createWeekendConcierge } from "./concierge.js";
 import { buildFranchiseWatchOrder, franchiseGuideSummary } from "./franchise.js";
 import { buildPersonWatchPath, personWatchPathSummary } from "./person-path.js";
+import { buildReleaseCalendarWatchlist, releaseCalendarWatchlistSummary } from "./release-calendar.js";
 import { recommendFromTasteProfile, tasteProfileSummary } from "./taste.js";
 
 // Type definitions
@@ -743,6 +744,48 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: "build_release_calendar_watchlist",
+        description: "Build a release-window watchlist with upcoming movies, provider-ready picks, broad-room baselines, and watch-later scoring",
+        inputSchema: {
+          type: "object",
+          properties: {
+            country: {
+              type: "string",
+              description: "ISO 3166-1 country code for release/provider context. Defaults to IN.",
+            },
+            language: {
+              type: "string",
+              description: "Original language code such as en, hi, ta, te, ko, or any.",
+            },
+            genre: {
+              type: "string",
+              description: "Optional genre name, for example action, comedy, or family.",
+            },
+            days: {
+              type: "string",
+              description: "Forward-looking release window in days, from 7 to 180. Defaults to 90.",
+            },
+            recentDays: {
+              type: "string",
+              description: "Recent-release backfill window in days, from 0 to 90. Defaults to 30.",
+            },
+            services: {
+              type: "array",
+              items: { type: "string" },
+              description: "Preferred streaming services, for example Netflix or Prime Video.",
+            },
+            minRating: {
+              type: "string",
+              description: "Minimum TMDB rating from 0 to 9. Defaults to 0.",
+            },
+            maxResults: {
+              type: "string",
+              description: "Number of watchlist entries to return, from 3 to 12. Defaults to 8.",
+            },
+          },
+        },
+      },
+      {
         name: "search_movies",
         description: "Search for movies by title or keywords",
         inputSchema: {
@@ -1158,6 +1201,30 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         return {
           content: [{ type: "text", text: personWatchPathSummary(result) }],
+          isError: false,
+        };
+      }
+
+      case "build_release_calendar_watchlist": {
+        const result = await buildReleaseCalendarWatchlist(
+          {
+            TMDB_API_KEY,
+            TMDB_BASE_URL,
+          },
+          {
+            country: request.params.arguments?.country as string | undefined,
+            language: request.params.arguments?.language as string | undefined,
+            genre: request.params.arguments?.genre as string | undefined,
+            days: request.params.arguments?.days as string | undefined,
+            recentDays: request.params.arguments?.recentDays as string | undefined,
+            services: request.params.arguments?.services as string[] | undefined,
+            minRating: request.params.arguments?.minRating as string | undefined,
+            maxResults: request.params.arguments?.maxResults as string | undefined,
+          },
+        );
+
+        return {
+          content: [{ type: "text", text: releaseCalendarWatchlistSummary(result) }],
           isError: false,
         };
       }
