@@ -35,6 +35,8 @@ interface Movie {
   release_date: string;
   original_language?: string;
   vote_average: number;
+  vote_count?: number;
+  popularity?: number;
   overview: string;
   poster_path?: string;
   runtime?: number;
@@ -119,6 +121,8 @@ interface TVShow {
   name: string;
   first_air_date: string;
   vote_average: number;
+  vote_count?: number;
+  popularity?: number;
   overview: string;
   poster_path?: string;
 }
@@ -467,6 +471,19 @@ function renderWeeklyTrendingByLanguage(movies: Movie[]): string {
 
   return lines.join("\n");
 }
+function formatRatingLine(voteAverage: number, voteCount?: number): string {
+  if (typeof voteCount === "number") {
+    return `Rating: ${voteAverage}/10 (${voteCount} votes)`;
+  }
+  return `Rating: ${voteAverage}/10`;
+}
+
+function formatPopularityLine(popularity?: number): string | null {
+  if (typeof popularity !== "number") {
+    return null;
+  }
+  return `Popularity: ${popularity.toFixed(3)}`;
+}
 
 server.setRequestHandler(ListResourcesRequestSchema, async (request) => {
   const params: Record<string, string> = {
@@ -493,6 +510,8 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     title: movie.title,
     releaseDate: movie.release_date,
     rating: movie.vote_average,
+    voteCount: movie.vote_count,
+    popularity: movie.popularity,
     overview: movie.overview,
     genres: movie.genres?.map(g => g.name).join(", "),
     runtime: movie.runtime ? `${movie.runtime} min` : undefined,
@@ -1066,6 +1085,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: [],
         },
       },
+      {
+        name: "get_top_rated",
+        description: "Get top rated movies from TMDB. Returns titles, ratings, release dates, and overviews for highly rated movies.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            language: {
+              type: "string",
+              description: "Language code for localized data (e.g. en-US, fr-FR). Defaults to en-US.",
+            },
+            page: {
+              type: "number",
+              description: "Page number for pagination (default: 1)",
+            },
+            region: {
+              type: "string",
+              description: "Optional ISO 3166-1 country code to filter release dates (e.g. US, FR, GB).",
+            },
+          },
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -1236,7 +1277,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const results = data.results
           .map((movie) =>
             `${movie.title} (${movie.release_date?.split("-")[0]}) - ID: ${movie.id}\n` +
-            `Rating: ${movie.vote_average}/10\n` +
+            `${formatRatingLine(movie.vote_average, movie.vote_count)}\n` +
+            `${formatPopularityLine(movie.popularity) ? `${formatPopularityLine(movie.popularity)}\n` : ""}` +
             `Overview: ${movie.overview}\n`
           )
           .join("\n---\n");
@@ -1260,7 +1302,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .slice(0, 5)
           .map((movie) =>
             `${movie.title} (${movie.release_date?.split("-")[0]})\n` +
-            `Rating: ${movie.vote_average}/10\n` +
+            `${formatRatingLine(movie.vote_average, movie.vote_count)}\n` +
+            `${formatPopularityLine(movie.popularity) ? `${formatPopularityLine(movie.popularity)}\n` : ""}` +
             `Overview: ${movie.overview}\n`
           )
           .join("\n---\n");
@@ -1284,7 +1327,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .slice(0, 10)
           .map((movie) =>
             `${movie.title} (${movie.release_date?.split("-")[0]})\n` +
-            `Rating: ${movie.vote_average}/10\n` +
+            `${formatRatingLine(movie.vote_average, movie.vote_count)}\n` +
+            `${formatPopularityLine(movie.popularity) ? `${formatPopularityLine(movie.popularity)}\n` : ""}` +
             `Overview: ${movie.overview}\n`
           )
           .join("\n---\n");
@@ -1348,7 +1392,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .slice(0, 10)
           .map((movie) =>
             `${movie.title} (${movie.release_date?.split("-")[0]}) - ID: ${movie.id}\n` +
-            `Rating: ${movie.vote_average}/10\n` +
+            `${formatRatingLine(movie.vote_average, movie.vote_count)}\n` +
+            `${formatPopularityLine(movie.popularity) ? `${formatPopularityLine(movie.popularity)}\n` : ""}` +
             `Overview: ${movie.overview}\n`
           )
           .join("\n---\n");
@@ -1404,7 +1449,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .slice(0, 10)
           .map((movie) =>
             `${movie.title} (${movie.release_date?.split("-")[0]}) - ID: ${movie.id}\n` +
-            `Rating: ${movie.vote_average}/10\n` +
+            `${formatRatingLine(movie.vote_average, movie.vote_count)}\n` +
+            `${formatPopularityLine(movie.popularity) ? `${formatPopularityLine(movie.popularity)}\n` : ""}` +
             `Overview: ${movie.overview}\n`
           )
           .join("\n---\n");
@@ -1486,7 +1532,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .slice(0, 10)
           .map((movie) =>
             `${movie.title} (${movie.release_date?.split("-")[0]}) - ID: ${movie.id}\n` +
-            `Rating: ${movie.vote_average}/10\n` +
+            `${formatRatingLine(movie.vote_average, movie.vote_count)}\n` +
+            `${formatPopularityLine(movie.popularity) ? `${formatPopularityLine(movie.popularity)}\n` : ""}` +
             `Overview: ${movie.overview}\n`
           )
           .join("\n---\n");
@@ -1518,7 +1565,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const lines = [
           `**${movie.title}** (${movie.release_date?.split("-")[0]})`,
           `ID: ${movie.id}`,
-          `Rating: ${movie.vote_average}/10`,
+          formatRatingLine(movie.vote_average, movie.vote_count),
+          formatPopularityLine(movie.popularity),
           movie.runtime ? `Runtime: ${movie.runtime} min` : null,
           movie.genres?.length ? `Genres: ${movie.genres.map(g => g.name).join(", ")}` : null,
           `\nOverview: ${movie.overview}`,
@@ -1649,7 +1697,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .slice(0, 10)
           .map((show) =>
             `${show.name} (${show.first_air_date?.split("-")[0]}) - ID: ${show.id}\n` +
-            `Rating: ${show.vote_average}/10\n` +
+            `${formatRatingLine(show.vote_average, show.vote_count)}\n` +
+            `${formatPopularityLine(show.popularity) ? `${formatPopularityLine(show.popularity)}\n` : ""}` +
             `Overview: ${show.overview}\n`
           )
           .join("\n---\n");
@@ -1671,7 +1720,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .slice(0, 10)
           .map((show) =>
             `${show.name} (${show.first_air_date?.split("-")[0]})\n` +
-            `Rating: ${show.vote_average}/10\n` +
+            `${formatRatingLine(show.vote_average, show.vote_count)}\n` +
+            `${formatPopularityLine(show.popularity) ? `${formatPopularityLine(show.popularity)}\n` : ""}` +
             `Overview: ${show.overview}\n`
           )
           .join("\n---\n");
@@ -1735,7 +1785,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .slice(0, 10)
           .map((movie) =>
             `${movie.title} (${movie.release_date?.split("-")[0]}) - ID: ${movie.id}\n` +
-            `Rating: ${movie.vote_average}/10\n` +
+            `${formatRatingLine(movie.vote_average, movie.vote_count)}\n` +
+            `${formatPopularityLine(movie.popularity) ? `${formatPopularityLine(movie.popularity)}\n` : ""}` +
             `Overview: ${movie.overview}\n`
           )
           .join("\n---\n");
@@ -1758,7 +1809,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           .slice(0, 15)
           .map((movie) =>
             `${movie.title} (${movie.release_date?.split("-")[0]}) - ID: ${movie.id}\n` +
-            `Rating: ${movie.vote_average}/10\n` +
+            `${formatRatingLine(movie.vote_average, movie.vote_count)}\n` +
+            `${formatPopularityLine(movie.popularity) ? `${formatPopularityLine(movie.popularity)}\n` : ""}` +
             `Overview: ${movie.overview}\n`
           )
           .join("\n---\n");
@@ -1771,6 +1823,39 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [{
             type: "text",
             text: `Movies now playing in theaters${dateRange}:\n\n${movies}`,
+          }],
+          isError: false,
+        };
+      }
+
+      case "get_top_rated": {
+        const language = (request.params.arguments?.language as string) || "en-US";
+        const page = (request.params.arguments?.page as number) || 1;
+        const region = request.params.arguments?.region as string | undefined;
+        const params: Record<string, string> = {
+          language,
+          page: String(page),
+        };
+        if (region) {
+          params.region = region;
+        }
+
+        const data = await fetchFromTMDB<TMDBResponse>("/movie/top_rated", params);
+
+        const movies = data.results
+          .slice(0, 15)
+          .map((movie) =>
+            `${movie.title} (${movie.release_date?.split("-")[0]}) - ID: ${movie.id}\n` +
+            `${formatRatingLine(movie.vote_average, movie.vote_count)}\n` +
+            `${formatPopularityLine(movie.popularity) ? `${formatPopularityLine(movie.popularity)}\n` : ""}` +
+            `Overview: ${movie.overview}\n`
+          )
+          .join("\n---\n");
+
+        return {
+          content: [{
+            type: "text",
+            text: `Top rated movies (page ${page}, language ${language}${region ? `, region ${region}` : ""}):\n\n${movies}`,
           }],
           isError: false,
         };
